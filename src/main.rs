@@ -36,17 +36,36 @@ fn setup_test_layer(w: f32, h: f32) -> guitk::view::Layer {
   let body_r_debug_draw = ComponentDebugDraw {
     entity_id: EntityID(4), color: RGBf32::new(0.0, 1.0, 1.0), };
 
+  const SIDEBAR_SIZE: f32 = 300.0;
   // Body vsplit
   let inner_body_aabb = ComponentAABB {
-    entity_id: EntityID(5), x: 0.0, y: 0.0, w: w, h: h - 100.0, };
+    entity_id: EntityID(5), x: -SIDEBAR_SIZE, y: 0.0, 
+    w: w+SIDEBAR_SIZE, h: h - 100.0, };
 
   let inner_body_container = ComponentContainer {
     entity_id: EntityID(5),
     layout: Layout::VSplit {
       entity_l: EntityID(3),
       entity_r: EntityID(4),
-      split_pos: 200.0,
+      split_pos: SIDEBAR_SIZE,
     },
+  };
+
+  let inner_body_trigger = ComponentTrigger {
+    entity_id: EntityID(5),
+    trigger_id: 0,
+    x: SIDEBAR_SIZE - 30.0, y: 0.0, w: 60.0, h: h - 100.0,
+    relative: true,};
+
+  let inner_body_scroll = ComponentTouchScroll {
+    entity_id: EntityID(5),
+    trigger_id: 0,
+    behaviour_flags: scroll_behaviour::LOCKED_Y, 
+    min_x:   - SIDEBAR_SIZE,
+    max_x: w + SIDEBAR_SIZE,
+    min_y: 0.0,
+    max_y: h,
+
   };
 
   // Main container
@@ -79,6 +98,10 @@ fn setup_test_layer(w: f32, h: f32) -> guitk::view::Layer {
 
   body_layer.component_container.push(inner_body_container);
 
+  body_layer.component_trigger.push(inner_body_trigger);
+
+  body_layer.component_touch_scroll.push(inner_body_scroll);
+
   layer.component_layer.push(body_layer);
 
   return layer;
@@ -104,6 +127,6 @@ fn main() {
 
   loop {
     // Render the view
-    guitk_state.render();
+    guitk_state.update();
   }
 }
