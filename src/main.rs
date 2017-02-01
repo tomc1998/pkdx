@@ -11,6 +11,7 @@ fn setup_logger() {
 fn setup_test_layer(w: f32, h: f32) -> guitk::view::Layer {
   use guitk::view::*;
   use guitk::entity::core::*;
+  use guitk::entity::animation::*;
   use guitk::common::color::*;
   use guitk::layout::*;
   use guitk::entity::EntityID;
@@ -40,7 +41,7 @@ fn setup_test_layer(w: f32, h: f32) -> guitk::view::Layer {
   // Body vsplit
   let inner_body_aabb = ComponentAABB {
     entity_id: EntityID(5), x: -SIDEBAR_SIZE, y: 0.0, 
-    w: w+SIDEBAR_SIZE, h: h - 100.0, };
+    w: w+SIDEBAR_SIZE, h: h, };
 
   let inner_body_container = ComponentContainer {
     entity_id: EntityID(5),
@@ -54,7 +55,7 @@ fn setup_test_layer(w: f32, h: f32) -> guitk::view::Layer {
   let inner_body_trigger = ComponentTrigger {
     entity_id: EntityID(5),
     trigger_id: 0,
-    x: SIDEBAR_SIZE - 30.0, y: 0.0, w: 60.0, h: h - 100.0,
+    x: SIDEBAR_SIZE - 50.0, y: 0.0, w: 100.0, h: h - 100.0,
     relative: true,};
 
   let inner_body_scroll = ComponentTouchScroll {
@@ -64,9 +65,13 @@ fn setup_test_layer(w: f32, h: f32) -> guitk::view::Layer {
     min_x:   - SIDEBAR_SIZE,
     max_x: w + SIDEBAR_SIZE,
     min_y: 0.0,
-    max_y: h,
+    max_y: h, };
 
-  };
+  let inner_body_scroll_snap = ComponentScrollSnap {
+    entity_id: EntityID(5),
+    snap_positions: vec![(-SIDEBAR_SIZE, 0.0), (0.0, 0.0)],
+    tween_func: TweenFunction::EaseOut, 
+    tween_len: 250, };
 
   // Main container
   let view_container_aabb = ComponentAABB {
@@ -81,28 +86,30 @@ fn setup_test_layer(w: f32, h: f32) -> guitk::view::Layer {
   };
 
   let mut layer = guitk::view::Layer::new();
-  layer.component_aabb.push(header_bar_aabb);
-  layer.component_aabb.push(body_aabb);
-  layer.component_aabb.push(view_container_aabb);
+  layer.component_aabb.add_component(header_bar_aabb);
+  layer.component_aabb.add_component(body_aabb);
+  layer.component_aabb.add_component(view_container_aabb);
 
-  layer.component_debug_draw.push(header_bar_debug_draw);
+  layer.component_debug_draw.add_component(header_bar_debug_draw);
 
-  layer.component_container.push(view_container_container);
+  layer.component_container.add_component(view_container_container);
 
-  body_layer.component_aabb.push(body_l_aabb);
-  body_layer.component_aabb.push(body_r_aabb);
-  body_layer.component_aabb.push(inner_body_aabb);
+  body_layer.component_aabb.add_component(body_l_aabb);
+  body_layer.component_aabb.add_component(body_r_aabb);
+  body_layer.component_aabb.add_component(inner_body_aabb);
 
-  body_layer.component_debug_draw.push(body_l_debug_draw);
-  body_layer.component_debug_draw.push(body_r_debug_draw);
+  body_layer.component_debug_draw.add_component(body_l_debug_draw);
+  body_layer.component_debug_draw.add_component(body_r_debug_draw);
 
-  body_layer.component_container.push(inner_body_container);
+  body_layer.component_container.add_component(inner_body_container);
 
-  body_layer.component_trigger.push(inner_body_trigger);
+  body_layer.component_trigger.add_component(inner_body_trigger);
 
-  body_layer.component_touch_scroll.push(inner_body_scroll);
+  body_layer.component_touch_scroll.add_component(inner_body_scroll);
 
-  layer.component_layer.push(body_layer);
+  body_layer.component_scroll_snap.add_component(inner_body_scroll_snap);
+
+  layer.component_layer.add_component(body_layer);
 
   return layer;
 }
